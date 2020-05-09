@@ -13,6 +13,32 @@ image: img/genie_logo.png
 
 ---
 
+## 自己紹介
+
+- 塚本真人
+- 株式会社Fusic
+- 普段はRoRでweb開発してます
+- 趣味: ポケモン
+- qiita: https://qiita.com/TsuMakoto
+- github: https://github.com/TsuMakoto
+
+![bg right:50% height:80%](img/49139020)
+
+---
+
+## アジェンダ
+
+- 動機
+- Genie.jlについて
+- Clean Architecture
+- Genie.jlのController
+- Genie.jlのModel
+- Genie.jlのView
+- おまけ
+- デメリット
+
+---
+
 ## 動機
 - Webの実装まで全てをJuliaで完結できたらよいのでは。。。？
   - 例えば、AI等の実装を行ったとき、わざわざAPI化するのもめんどい
