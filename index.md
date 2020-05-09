@@ -138,7 +138,8 @@ end
 ```julia
 
 function index(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  render(:tasks, :index, tasks = interactor.call(Tasks.Task, SearchLight))
+  tasks = interactor.call(Tasks.Task, SearchLight)
+  render(:tasks, :index, tasks = tasks)
 end
 
 
@@ -156,7 +157,8 @@ end
 ```julia
 
 function index(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  render(:tasks, :index, tasks = interactor.call(Tasks.Task, SearchLight))
+  tasks = interactor.call(Tasks.Task, SearchLight)
+  render(:tasks, :index, tasks = tasks)
 end
 
 ```
@@ -170,7 +172,7 @@ end
 
 ---
 
-## アクションとルーティングに非依存
+## アクションとルーティングが独立
 
 [routing](https://github.com/GenieFramework/Genie.jl/blob/master/src/Router.jl)の実装をみると
 
@@ -204,7 +206,8 @@ end
 module TasksController
 
 function index(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  render(:tasks, :index, tasks = interactor.call(Tasks.Task, SearchLight))
+  tasks = interactor.call(Tasks.Task, SearchLight)
+  render(:tasks, :index, tasks = tasks)
 end
 
 end
@@ -245,7 +248,8 @@ route("/tasks", action)
 module IndexTasks
 
 function call(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  render(:tasks, :index, tasks = interactor.call(Tasks.Task, SearchLight))
+  tasks = interactor.call(Tasks.Task, SearchLight)
+  render(:tasks, :index, tasks = tasks)
 end
 
 end
@@ -294,6 +298,34 @@ SearchLight.save!(task)
 
 ---
 
+## View
+テンプレートファイルはjuliaで記述できる
+
+フレームワークへ依存せず、そのまま移行可能
+
+```julia
+# index.html.jl
+<%
+  Html.ul() do
+    if length(@vars(:tasks)) == 0
+      "タスクがありません。"
+    else
+      @foreach(@vars(:tasks)) do task
+        "<li>$(task.contents)</li>"
+      end
+    end
+  end
+%>
+```
+
+---
+
+## 結論
+
+### Genie.jlではcleanな設計が可能！！！
+
+---
+
 ## おまけ
 
 - jsonの送信も簡単にできる
@@ -306,7 +338,7 @@ SearchLight.save!(task)
 ## デメリット
 - 起動がなぜかおそい
 - 設定周りがわりとしんどい
-- include関係で結構コケる
+- include関係で結構コケる(らしい)
 - Documentが貧弱
   - まだ開発段階といったところ
 
@@ -314,4 +346,4 @@ SearchLight.save!(task)
 
 ## おわりに
 すぐにProductへ適応とはいかないかもしれないが、
-選択肢のひとつとしてどうでしょうか
+選択肢のひとつとしてどうでしょうか?
