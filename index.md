@@ -95,6 +95,7 @@ image: img/genie_logo.png
 タスクを表示するコード
 
 ```julia
+
 using Genie.Renderer
 using SearchLight
 using Tasks
@@ -131,40 +132,69 @@ end
 
 ---
 
-## コード
-
-### 依存を少なくする
+## 依存を少なくする
 
 ```julia
 
-function index(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  tasks = interactor.call(Tasks.Task, SearchLight)
-  render(:tasks, :index, tasks = tasks)
+# GetTasks.jl
+# 依存しているもの
+import App.InputPorts: GetDatasets
+
+mutable struct GetTasks <: GetDatasets
+  model
+  ormapper
+  call::Function
+
+  function getTasks(model, ormapper)
+    ormapper.all(model)
+  end
+
+  GetTasks(model, ormapper;call=getTasks)
+    = new(model, ormapper, () -> call(model, ormapper))
 end
 
 
-```
+# Controller
 
-- 依存しているもの
-  - GetDatasets
+function index(interactor::GetDatasets; render=Genie.Renderer.Html.html)
+  tasks = interactor.call()
+  render(:tasks, :index, tasks = tasks)
+end
+
+```
 
 ---
 
-## コード
-
-### 依存を少なくする
+## 依存を少なくする
 
 ```julia
 
+# GetTasks.jl
+# 依存しているもの <= interfaceへ依存させている
+import App.InputPorts: GetDatasets
+
+mutable struct GetTasks <: GetDatasets
+  model
+  ormapper
+  call::Function
+
+  function getTasks(model, ormapper)
+    ormapper.all(model)
+  end
+
+  GetTasks(model, ormapper;call=getTasks)
+    = new(model, ormapper, () -> call(model, ormapper))
+end
+
+
+# Controller
+
 function index(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  tasks = interactor.call(Tasks.Task, SearchLight)
+  tasks = interactor.call()
   render(:tasks, :index, tasks = tasks)
 end
 
 ```
-
-- 依存しているもの
-  - GetDatasets <= interfaceへ依存させている
 
 ---
 
@@ -206,7 +236,7 @@ end
 module TasksController
 
 function index(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  tasks = interactor.call(Tasks.Task, SearchLight)
+  tasks = interactor.call()
   render(:tasks, :index, tasks = tasks)
 end
 
@@ -223,8 +253,12 @@ end
 ```julia
 # routes.jl
 
+using TasksController
+using Tasks
+using SearchLight
+
 function action
-  TasksController.index(GetTasks())
+  TasksController.index(GetTasks(Tasks.Task, SearchLight))
 end
 
 route("/tasks", action)
@@ -248,7 +282,7 @@ route("/tasks", action)
 module IndexTasks
 
 function call(interactor::GetDatasets; render=Genie.Renderer.Html.html)
-  tasks = interactor.call(Tasks.Task, SearchLight)
+  tasks = interactor.call()
   render(:tasks, :index, tasks = tasks)
 end
 
@@ -257,7 +291,7 @@ end
 # routes.jl
 
 function action
-  IndexTasks.call(GetTasks())
+  IndexTasks.call(GetTasks(Tasks.Task, SearchLight))
 end
 
 route("/tasks", action)
